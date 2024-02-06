@@ -18,11 +18,6 @@ const userSchema = new mongoose.Schema({
    },
 });
 
-
-// bcrypt.hash()
-
-
-
 const User = mongoose.model('user', userSchema);
 
 module.exports = User;
