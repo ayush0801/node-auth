@@ -56,8 +56,30 @@ module.exports.login_post = async (req, res) => {
    if(!isEmailValid){
       return res.status(403).json({error: "Invalid Email"})
    }
-
-   
-
-   res.send('user login');
+   userModel.findOne({email})
+   .then((data) => {
+      if(!data){
+         return res.status(401).json({error: "Email not found"});
+      }
+      bcrypt.compare(password, data.password)
+      .then((valid) => {
+         if(!valid){
+            return res.status(401).json("Invalid email or password");
+         }
+         else{
+            const maxAge = 3 * 24 * 60 * 60;
+            const token = jwt.sign({id: data._id}, SECRET_TOKEN, {expiresIn: maxAge});
+            res.cookie('jwt', token,  { httpOnly: true, maxAge: maxAge });
+            res.status(200).json({message:  `Logged In as ${data.email}`});
+         }
+      })
+      .catch((err) => {
+         console.log(err);
+         return res.json({error: err})
+      })
+   })
+   .catch((err) => {
+      console.log(err);
+      return res.status(500).json({error: err});
+   })
 }
